@@ -1,0 +1,31 @@
+# Hi, 
+# don't panic, this file may look scary, but it really isn't ;)
+#
+# So this file uses TOML - Tom's Obvious Minimal Language, it is very similar to
+# JSON or YAML so if you familiar with those, you won't have any problems. You
+# can read more about TOML here: https://toml.io/
+#
+# This config is NOT hotreloadable, so you will need to restart the server after
+# editing this file.
+
+# Here you can select which theme the interface should have.
+# You can also create your own theme by cloning the template/basic folder and
+# editing the HTML there to your desire. All files there have a lot of comments
+# to help you out.
+template = "basic"
+
+# The output file in which the data will be saved
+filename = "users.sqlite"
+
+# The server listens on this port via HTTP (no HTTPS support use Apache or 
+# NGNIX instead).
+port = 3000
+
+# For admins there is the /admin page to login. With that you can export data 
+# from the web interface and see some statistics while the app is running.
+# You may want to deactivate the whole interface for secuirty purposes, if so 
+# the following flag should be set to false.
+admin-enable = true
+
+# The admins still needs a password so here you can set one.
+admin-password = "supersecret"
