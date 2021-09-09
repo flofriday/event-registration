@@ -28,6 +28,13 @@
     <div id="error" style="color: red"></div>
     <button onclick="register()">Register</button>
 
+    <footer style="margin-top: 10px">
+      <small>
+        Created with ❤️ by <a href="https://github.com/flofriday">flofriday</a>
+      </small>
+    </footer>
+    r
+
     <script>
       // Get all elements
       const formEl = document.getElementById("form");
@@ -62,7 +69,7 @@
           }),
         });
 
-        if (res.status != 200) {
+        if (res.status != 201) {
           progressEl.hidden = true;
           errorEl.innerText =
             "Something went wrong, the server returned: " + res.status;

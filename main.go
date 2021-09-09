@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"sort"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -44,7 +43,7 @@ func handleHome(store *SqlStore, config *Config) http.HandlerFunc {
 
 		// So the user has the right cookie, so lets load their contact data
 		// and show them that.
-		user, err := store.getByUuid(cookie.Value)
+		user, err := store.GetByUuid(cookie.Value)
 		if err != nil {
 			// The user could not be loaded so maybe his cookie is bad or the
 			// database got reset since they logged in.
@@ -71,7 +70,7 @@ func handleHome(store *SqlStore, config *Config) http.HandlerFunc {
 }
 
 func handleAdmin(store *SqlStore, config *Config) http.HandlerFunc {
-	// The datastructure that is used to render the admin template
+	// The datastructures that are used to render the admin template
 	type Statistic struct {
 		UsersTotal int
 		LastUsers  []User
@@ -89,29 +88,25 @@ func handleAdmin(store *SqlStore, config *Config) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 
 		// This could be more efficient in SQL solved
-		users, err := store.getAll()
+		users, err := store.GetLastN(10)
 		if err != nil {
-			log.Printf("Unable to load all users: %s", err.Error())
+			log.Printf("Unable to load last n users: %s", err.Error())
 			http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
-		sort.Slice(users, func(i, j int) bool {
-			return users[i].CreatedAt.After(users[j].CreatedAt)
-		})
-
-		total := len(users)
-
-		lastUsers := users
-		if len(lastUsers) > 10 {
-			lastUsers = lastUsers[:10]
+		total, err := store.Count()
+		if err != nil {
+			log.Printf("Unable to count users: %s", err.Error())
+			http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
+			return
 		}
 
 		data := AdminData{
 			Config: config,
 			Statistic: &Statistic{
 				UsersTotal: total,
-				LastUsers:  lastUsers,
+				LastUsers:  users,
 			},
 		}
 
@@ -145,8 +140,6 @@ func createUser(store *SqlStore) http.HandlerFunc {
 			return
 		}
 
-		// TODO: do validation here
-
 		// Create a new user object
 		uuid, err := createUuid()
 		if err != nil {
@@ -165,7 +158,7 @@ func createUser(store *SqlStore) http.HandlerFunc {
 		}
 
 		// Add the user to the storage
-		err = store.add(user)
+		err = store.Add(user)
 		if err != nil {
 			log.Printf("Unable to insert the user: %s", err.Error())
 			http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
@@ -182,6 +175,19 @@ func createUser(store *SqlStore) http.HandlerFunc {
 			HttpOnly: true,
 		}
 		http.SetCookie(rw, &cookie)
+		rw.WriteHeader(http.StatusCreated)
+	}
+}
+
+func deleteUser(store *SqlStore) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		uuid := chi.URLParam(r, "uuid")
+
+		err := store.DeleteByUuid(uuid)
+		if err != nil {
+			log.Printf("Unable to delete user '%s': %s", uuid, err.Error())
+		}
+
 		rw.WriteHeader(http.StatusOK)
 	}
 }
@@ -189,7 +195,7 @@ func createUser(store *SqlStore) http.HandlerFunc {
 func getUsersCSV(store *SqlStore) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		// Load all users
-		users, err := store.getAll()
+		users, err := store.GetAll()
 		if err != nil {
 			log.Printf("Unable to load all users: %s", err.Error())
 			http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
@@ -225,7 +231,7 @@ func getUsersCSV(store *SqlStore) http.HandlerFunc {
 func getUsersJSON(store *SqlStore) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		// Load all users
-		users, err := store.getAll()
+		users, err := store.GetAll()
 		if err != nil {
 			log.Printf("Unable to load all users: %s", err.Error())
 			http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
@@ -279,6 +285,7 @@ func createRoutes(store *SqlStore, config *Config) chi.Router {
 			r.Route("/", func(r chi.Router) {
 				r.Use(adminMiddleware)
 
+				r.Delete("/users/{uuid}", deleteUser(store))
 				r.Get("/users.csv", getUsersCSV(store))
 				r.Get("/users.json", getUsersJSON(store))
 			})
