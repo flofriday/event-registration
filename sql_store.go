@@ -16,7 +16,6 @@ type SqlStore struct {
 	insertStmt    *sql.Stmt
 	queryUuidStmt *sql.Stmt
 	queryAllStmt  *sql.Stmt
-	//statisticStmt *sql.Stmt
 }
 
 func NewSqlStore(filename string) (*SqlStore, error) {
@@ -61,7 +60,7 @@ func NewSqlStore(filename string) (*SqlStore, error) {
 }
 
 func (s *SqlStore) add(user User) error {
-	_, err := s.insertStmt.Exec(user.UUID, user.FirstName, user.LastName, user.Email, user.Phone, user.CreatedAt.UnixMilli())
+	_, err := s.insertStmt.Exec(user.UUID, user.FirstName, user.LastName, user.Email, user.Phone, user.CreatedAt.UnixNano())
 	return err
 }
 
@@ -69,13 +68,13 @@ func (s *SqlStore) getByUuid(uuid string) (*User, error) {
 	var user User
 	row := s.queryUuidStmt.QueryRow(uuid)
 
-	var milliseconds int64
-	err := row.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email, &user.Phone, &milliseconds)
+	var nanoseconds int64
+	err := row.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email, &user.Phone, &nanoseconds)
 	if err != nil {
 		return nil, err
 	}
 
-	user.CreatedAt = time.UnixMilli(milliseconds)
+	user.CreatedAt = time.Unix(0, nanoseconds)
 	return &user, nil
 }
 
@@ -89,18 +88,14 @@ func (s *SqlStore) getAll() ([]User, error) {
 	users := make([]User, 0)
 	for rows.Next() {
 		var user User
-		var milliseconds int64
-		err := rows.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email, &user.Phone, &milliseconds)
+		var nanoseconds int64
+		err := rows.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email, &user.Phone, &nanoseconds)
 		if err != nil {
 			return nil, err
 		}
-		user.CreatedAt = time.UnixMilli(milliseconds)
+		user.CreatedAt = time.Unix(0, nanoseconds)
 		users = append(users, user)
 	}
 
 	return users, nil
 }
-
-// func (s *SqlStore) getStatistics(uuid string) (*int, error) {
-// 	return nil, errors.New("Not implemented")
-// }

@@ -1,6 +1,6 @@
 module github.com/flofriday/event-registration
 
-go 1.17
+go 1.16
 
 require (
 	github.com/BurntSushi/toml v0.4.1
