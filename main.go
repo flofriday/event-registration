@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -9,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"sort"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -65,6 +67,55 @@ func handleHome(store *SqlStore, config *Config) http.HandlerFunc {
 		// Ok the user is really logged in so show them who they are:
 		rw.WriteHeader(http.StatusOK)
 		successTemplate.Execute(rw, user)
+	}
+}
+
+func handleAdmin(store *SqlStore, config *Config) http.HandlerFunc {
+	// The datastructure that is used to render the admin template
+	type Statistic struct {
+		UsersTotal int
+		LastUsers  []User
+	}
+	type AdminData struct {
+		Config    *Config
+		Statistic *Statistic
+	}
+
+	// Setup some templates and files, this will only run once and can be used
+	// concurrently by the function that will be returned.
+	adminFilename := path.Join("templates", config.Template, "admin.html")
+	adminTemplate := template.Must(template.ParseFiles(adminFilename))
+
+	return func(rw http.ResponseWriter, r *http.Request) {
+
+		// This could be more efficient in SQL solved
+		users, err := store.getAll()
+		if err != nil {
+			log.Printf("Unable to load all users: %s", err.Error())
+			http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		sort.Slice(users, func(i, j int) bool {
+			return users[i].CreatedAt.After(users[j].CreatedAt)
+		})
+
+		total := len(users)
+
+		lastUsers := users
+		if len(lastUsers) > 10 {
+			lastUsers = lastUsers[:10]
+		}
+
+		data := AdminData{
+			Config: config,
+			Statistic: &Statistic{
+				UsersTotal: total,
+				LastUsers:  lastUsers,
+			},
+		}
+
+		adminTemplate.Execute(rw, data)
 	}
 }
 
@@ -136,29 +187,86 @@ func createUser(store *SqlStore) http.HandlerFunc {
 }
 
 func getUsersCSV(store *SqlStore) http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {}
-}
+	return func(rw http.ResponseWriter, r *http.Request) {
+		// Load all users
+		users, err := store.getAll()
+		if err != nil {
+			log.Printf("Unable to load all users: %s", err.Error())
+			http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 
-func getUsersPDF(store *SqlStore) http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {}
+		// Create a new csv writer
+		rw.Header().Add("Content-Type", "text/csv")
+		rw.WriteHeader(200)
+		rw.Header().Add("Content-Disposition", "attachment")
+		csvWriter := csv.NewWriter(rw)
+
+		// Write the first line
+		csvWriter.Write([]string{
+			"First Name", "Last Name", "Email", "Phonenumber", "Registered at",
+		})
+
+		// Write all users
+		for _, user := range users {
+			csvWriter.Write([]string{
+				user.FirstName,
+				user.LastName,
+				user.Email,
+				user.Phone,
+				user.CreatedAt.Format("2006-01-02 15:04:05 MST"),
+			})
+
+		}
+		csvWriter.Flush()
+	}
 }
 
 func getUsersJSON(store *SqlStore) http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {}
-}
+	return func(rw http.ResponseWriter, r *http.Request) {
+		// Load all users
+		users, err := store.getAll()
+		if err != nil {
+			log.Printf("Unable to load all users: %s", err.Error())
+			http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 
-func getStatistic(store *SqlStore) http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {}
+		// Convert to JSON
+		data, err := json.Marshal(users)
+		if err != nil {
+			log.Printf("Unable encode users to json: %s", err.Error())
+			http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		rw.Header().Add("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusOK)
+		rw.Write(data)
+	}
 }
 
 func createRoutes(store *SqlStore, config *Config) chi.Router {
+	// Setup the router and the admin middleware (requires a basicAuth password)
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+
+	message := "Login as a admin"
+	credentials := map[string]string{"admin": config.AdminPassword}
+	adminMiddleware := middleware.BasicAuth(message, credentials)
 
 	// Static files and templates
 	r.Get("/", handleHome(store, config))
 	filesDir := http.Dir("static")
 	FileServer(r, "/static", filesDir)
+
+	// Admin webinterface
+	if config.AdminEnable {
+		r.Route("/admin", func(r chi.Router) {
+			r.Use(adminMiddleware)
+			r.Get("/", handleAdmin(store, config))
+		})
+	}
 
 	// REST API
 	r.Route("/api", func(r chi.Router) {
@@ -168,10 +276,12 @@ func createRoutes(store *SqlStore, config *Config) chi.Router {
 		// Actions performend by admins
 		// TODO: add admin middleware
 		if config.AdminEnable {
-			r.Get("/users.csv", getUsersCSV(store))
-			r.Get("/users.pdf", getUsersPDF(store))
-			r.Get("/users.json", getUsersJSON(store))
-			r.Get("/statistic", getStatistic(store))
+			r.Route("/", func(r chi.Router) {
+				r.Use(adminMiddleware)
+
+				r.Get("/users.csv", getUsersCSV(store))
+				r.Get("/users.json", getUsersJSON(store))
+			})
 		}
 	})
 
@@ -198,5 +308,8 @@ func main() {
 
 	// Start the server
 	log.Printf("Started server at port %d", config.Port)
-	http.ListenAndServe(fmt.Sprintf(":%d", config.Port), router)
+	err = http.ListenAndServe(fmt.Sprintf(":%d", config.Port), router)
+	if err != nil {
+		log.Fatalf("Starting the server failed: %s", err.Error())
+	}
 }

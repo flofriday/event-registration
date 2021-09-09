@@ -79,7 +79,7 @@ func (s *SqlStore) getByUuid(uuid string) (*User, error) {
 	return &user, nil
 }
 
-func (s *SqlStore) getAll(uuid string) ([]User, error) {
+func (s *SqlStore) getAll() ([]User, error) {
 	rows, err := s.queryAllStmt.Query()
 	if err != nil {
 		return nil, err
