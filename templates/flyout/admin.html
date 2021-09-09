@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin</title>
+  </head>
+  <body>
+    <style>
+      table,
+      th,
+      td {
+        border: 1px solid black;
+      }
+      table {
+        border-collapse: collapse;
+      }
+      td,
+      th {
+        padding: 5px;
+      }
+    </style>
+
+    <h1 style="background-color: coral">Admin</h1>
+
+    <b>Total Registered Users:</b> {{.Statistic.UsersTotal}} <br />
+
+    <b>Last {{len .Statistic.LastUsers}} registered users:</b>
+    <table>
+      <tr>
+        <th>Registered</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th></th>
+      </tr>
+      {{range .Statistic.LastUsers}}
+      <tr>
+        <td>{{.CreatedAt.Format "15:04 02.01.2006 MST"}}</td>
+        <td>{{.FirstName}}</td>
+        <td>{{.LastName}}</td>
+        <td>{{.Email}}</td>
+        <td>{{.Phone}}</td>
+        <td>
+          <button
+            onclick="deleteUser({{.UUID}}, {{.FirstName}} + {{.LastName}})"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+      {{end}}
+    </table>
+
+    <h2>Export all users:</h2>
+    <ul>
+      <li><a href="/api/users.csv">as CSV</a></li>
+      <li><a href="/api/users.json">as JSON</a></li>
+    </ul>
+    <h2>Config</h2>
+    <ul>
+      <li><b>Template Theme:</b> {{.Config.Template}}</li>
+      <li><b>Port:</b> {{.Config.Port}}</li>
+      <li><b>File:</b> {{.Config.Filename}}</li>
+    </ul>
+    <div>Close the browser (not just the tab) to logout.</div>
+
+    <footer style="margin-top: 10px">
+      <small>
+        Created with ❤️ by <a href="https://github.com/flofriday">flofriday</a>
+      </small>
+    </footer>
+
+    <script>
+      async function deleteUser(uuid, name) {
+        const sure = confirm("Do you want to delete " + name + " ?");
+        if (sure == false) {
+          return;
+        }
+
+        const res = await fetch(location.origin + "/api/users/" + uuid, {
+          method: "delete",
+        });
+
+        if (res.status != 200) {
+          alert("Something went wrong, the server returned: " + res.status);
+        } else {
+          location.reload();
+        }
+      }
+    </script>
+  </body>
+</html>

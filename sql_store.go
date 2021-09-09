@@ -111,7 +111,7 @@ func (s *SqlStore) DeleteByUuid(uuid string) error {
 
 	rowsAffected, _ := res.RowsAffected()
 	if rowsAffected != 1 {
-		return errors.New("Nothing deleted, maybe user doesn't exist anymore?")
+		return errors.New("nothing deleted, maybe user doesn't exist anymore?")
 	}
 
 	return nil

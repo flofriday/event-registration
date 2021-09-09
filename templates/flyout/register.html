@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+
+    <link
+      rel="icon"
+      href="https://spaceteam.at/wp-content/uploads/2020/11/cropped-Space-Team-Favicon-Black-192px-32x32.png"
+      sizes="32x32"
+    />
+    <link
+      rel="icon"
+      href="https://spaceteam.at/wp-content/uploads/2020/11/cropped-Space-Team-Favicon-Black-192px-192x192.png"
+      sizes="192x192"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="https://spaceteam.at/wp-content/uploads/2020/11/cropped-Space-Team-Favicon-Black-192px-180x180.png"
+    />
+    <meta
+      name="msapplication-TileImage"
+      content="https://spaceteam.at/wp-content/uploads/2020/11/cropped-Space-Team-Favicon-Black-192px-270x270.png"
+    />
+
+    <title>Register Flyout Event</title>
+  </head>
+  <body>
+    <div class="container">
+      <div style="display: flex; justify-content: center">
+        <img
+          src="https://spaceteam.at/wp-content/uploads/2020/11/SpaceTeam_Logo_Black.png"
+          alt="Spaceteam Logo"
+          style="width: 256px; max-width: 100%"
+        />
+      </div>
+      <h1>Register - Flyout</h1>
+      <div>
+        To enter the Flyout Event you need to register for contact-tracing.
+      </div>
+      <form class="row g-3 mt-4" id="form">
+        <div class="col-sm-6">
+          <label for="firstName" class="form-label">First Name</label>
+          <input type="text" class="form-control" id="firstName" required />
+        </div>
+        <div class="col-sm-6">
+          <label for="lastName" class="form-label">Last Name</label>
+          <input type="text" class="form-control" id="lastName" required />
+        </div>
+        <div class="col-12">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" required />
+        </div>
+        <div class="col-12">
+          <label for="phone" class="form-label">Telephone</label>
+          <input type="tel" class="form-control" id="phone" required />
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-primary" onclick="register(event)">
+            <span
+              id="progress"
+              hidden=""
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            Register
+          </button>
+        </div>
+      </form>
+
+      <div id="error" style="color: red"></div>
+    </div>
+
+    <script>
+      // Get all elements
+      const formEl = document.getElementById("form");
+      const firstNameEl = document.getElementById("firstName");
+      const lastNameEl = document.getElementById("lastName");
+      const emailEl = document.getElementById("email");
+      const phoneEl = document.getElementById("phone");
+      const errorEl = document.getElementById("error");
+      const progressEl = document.getElementById("progress");
+
+      async function register(e) {
+        e.preventDefault();
+
+        // Disable all elements
+        const elements = form.elements;
+        for (let i = 0, len = elements.length; i < len; ++i) {
+          elements[i].readOnly = true;
+        }
+        progressEl.hidden = false;
+
+        // Register at the server
+        const host = location.origin;
+        const res = await fetch(location.origin + "/api/users", {
+          method: "post",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstName: firstNameEl.value,
+            lastName: lastNameEl.value,
+            email: emailEl.value,
+            phone: phoneEl.value,
+          }),
+        });
+
+        if (res.status != 201) {
+          progressEl.hidden = true;
+          errorEl.innerText =
+            "Something went wrong, the server returned: " + res.status;
+        } else {
+          // Reload the page to show what they entered.
+          // Yes I know this is not best practice but it will work just fine for
+          // such a small app.
+          location.reload();
+        }
+      }
+    </script>
+  </body>
+</html>

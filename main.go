@@ -261,10 +261,8 @@ func createRoutes(store *SqlStore, config *Config) chi.Router {
 	credentials := map[string]string{"admin": config.AdminPassword}
 	adminMiddleware := middleware.BasicAuth(message, credentials)
 
-	// Static files and templates
+	// Templates
 	r.Get("/", handleHome(store, config))
-	filesDir := http.Dir("static")
-	FileServer(r, "/static", filesDir)
 
 	// Admin webinterface
 	if config.AdminEnable {

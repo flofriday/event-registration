@@ -21,6 +21,12 @@ However, it should also be easily adaptable to other events.
 
 ## Setup
 
-1. First you need to install Go, a C compiler, and sqlite.
+1. First you need to install Go 1.16 or later, a C compiler, and sqlite.
 2. Edit config.toml (the file has comments to guide you)
 3. Compile with `go build` and run with `./event-registration`
+
+## Licence
+
+Everything in this repository is under the MIT license, except for the
+`flyout` template folder. I included those templates to show how this service
+was used in production.
