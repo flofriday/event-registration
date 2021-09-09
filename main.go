@@ -109,7 +109,7 @@ func createUser(store *SqlStore) http.HandlerFunc {
 			FirstName: input.FirstName,
 			LastName:  input.LastName,
 			Email:     input.Email,
-			Phone:     input.Email,
+			Phone:     input.Phone,
 			CreatedAt: time.Now().UTC(),
 		}
 
