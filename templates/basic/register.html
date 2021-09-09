@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register</title>
+  </head>
+  <body>
+    <h1>Register</h1>
+    <div>
+      To enter the super secret event, you first have to enter your information
+      for corona contact tracing.
+    </div>
+    <br />
+    <form id="form">
+      <label for="firstName">First Name</label> <br />
+      <input type="text" id="firstName" required /> <br />
+      <label for="lastName">Last Name</label> <br />
+      <input type="text" id="lastName" required /> <br />
+      <label for="email">Email</label> <br />
+      <input type="email" id="email" required /> <br />
+      <label for="phone">Phone Number</label> <br />
+      <input type="tel" id="phone" required /> <br />
+    </form>
+    <div id="progress" hidden="">
+      <progress max="100"></progress>
+    </div>
+    <div id="error" style="color: red"></div>
+    <button onclick="register()">Register</button>
+
+    <script>
+      // Get all elements
+      const formEl = document.getElementById("form");
+      const firstNameEl = document.getElementById("firstName");
+      const lastNameEl = document.getElementById("lastName");
+      const emailEl = document.getElementById("email");
+      const phoneEl = document.getElementById("phone");
+      const errorEl = document.getElementById("error");
+      const progressEl = document.getElementById("progress");
+
+      async function register() {
+        // Disable all elements
+        const elements = form.elements;
+        for (let i = 0, len = elements.length; i < len; ++i) {
+          elements[i].readOnly = true;
+        }
+        progressEl.hidden = false;
+
+        // Register at the server
+        const host = location.origin;
+        const res = await fetch(location.origin + "/api/users", {
+          method: "post",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstName: firstNameEl.value,
+            lastName: lastNameEl.value,
+            email: emailEl.value,
+            phone: emailEl.value,
+          }),
+        });
+
+        if (res.status != 200) {
+          progressEl.hidden = true;
+          errorEl.innerText =
+            "Something went wrong, the server returned: " + res.status;
+        } else {
+          // Reload the page to show what they entered.
+          // Yes I know this is not best practice but it will work just fine for
+          // such a small app.
+          location.reload();
+        }
+      }
+    </script>
+  </body>
+</html>

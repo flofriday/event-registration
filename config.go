@@ -1,4 +1,4 @@
-package eventregistration
+package main
 
 import (
 	"os"

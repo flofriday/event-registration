@@ -23,4 +23,4 @@ However, it should also be easily adaptable to other events.
 
 1. First you need to install Go, a C compiler, and sqlite.
 2. Edit config.toml (the file has comments to guide you)
-3. Run `go run main.go`
+3. Compile with `go build` and run with `./event-registration`
