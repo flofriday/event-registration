@@ -7,9 +7,7 @@ This service is developed for the
 [TU Wien SpaceTeam](https://spaceteam.at/?lang=en).
 However, it should also be easily adaptable to other events.
 
-## Goals
-
-**Note:** At the moment none of those are implemented
+## Features
 
 - Storage of contact data according to the current situation in Austria:
   - first and last name
