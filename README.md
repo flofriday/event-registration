@@ -1,6 +1,7 @@
 # event-registration
 
-![out](https://user-images.githubusercontent.com/21206831/132853558-d948faa4-dd40-4730-809a-5267b1890de5.png)
+![Screenshot](https://user-images.githubusercontent.com/21206831/132953023-4ccf8fb8-0a3a-445c-9802-799b990db510.png)
+
 
 This service is developed for the
 [Flyout Event](https://spaceteam.at/flyout/?lang=en) organized by the
@@ -42,7 +43,7 @@ register. Once they are registered, a cookie is set, which will only expire
 after three days or if the user is deleted from the database. This means all
 cookies can be invalidated by deleting the sqlite database file.
 
-For you, the event host, and your colleagues is a admin page available under
+For you, the event host, and your colleagues, there is a admin page available under
 `/admin`. From there you can export all contacts as JSON or CSV(Excel). The
 admin dashboard also shows the last 10 registered persons which means your
 colleagues at the entrance don't have to touch attendees phones and can verify
