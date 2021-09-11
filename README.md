@@ -49,6 +49,8 @@ admin dashboard also shows the last 10 registered persons which means your
 colleagues at the entrance don't have to touch attendees phones and can verify
 registrations from a save distance on their own devices.
 
+![Screenshot](https://user-images.githubusercontent.com/21206831/132955534-bcb03c1f-82db-4377-9ce5-1386dfa4dd2a.png)
+
 ## Licence
 
 Everything in this repository is under the MIT license, except for the
