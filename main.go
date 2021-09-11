@@ -154,7 +154,7 @@ func createUser(store *SqlStore) http.HandlerFunc {
 			LastName:  input.LastName,
 			Email:     input.Email,
 			Phone:     input.Phone,
-			CreatedAt: time.Now().UTC(),
+			CreatedAt: time.Now(),
 		}
 
 		// Add the user to the storage
@@ -173,6 +173,7 @@ func createUser(store *SqlStore) http.HandlerFunc {
 			Path:     "/",
 			Expires:  time.Now().Add(time.Hour * 24 * 3),
 			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
 		}
 		http.SetCookie(rw, &cookie)
 		rw.WriteHeader(http.StatusCreated)
