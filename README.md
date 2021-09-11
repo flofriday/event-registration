@@ -17,11 +17,22 @@ However, it should also be easily adaptable to other events.
 - Simple storage (sqlite) and export(csv) via the Webinterface.
 - Great documentation
 
-## Setup
+## Setup native
 
 1. First you need to install Go 1.16 or later, a C compiler, and sqlite.
 2. Edit config.toml (the file has comments to guide you)
 3. Compile with `go build` and run with `./event-registration`
+
+The app is now available at http://localhost:3000/
+
+## Setup with docker
+
+1. First you need to install Docker
+2. Edit config.toml (the file has comments to guide you)
+3. Build the docker image with `docker build -t events .`
+4. Run the container with: `docker run -it -p 3000:3000 --rm --name events-container events`
+
+The app is now available at http://localhost:3000/
 
 ## Licence
 
