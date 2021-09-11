@@ -34,6 +34,20 @@ The app is now available at http://localhost:3000/
 
 The app is now available at http://localhost:3000/
 
+## How it works
+
+After you deployed the app you can [create a QR Code](https://qr-creator.com/url.php)
+to the domain where it is running. Attendees of the event scan that code and
+register. Once they are registered, a cookie is set, which will only expire
+after three days or if the user is deleted from the database. This means all
+cookies can be invalidated by deleting the sqlite database file.
+
+For you, the event host, and your colleagues is a admin page available under
+`/admin`. From there you can export all contacts as JSON or CSV(Excel). The
+admin dashboard also shows the last 10 registered persons which means your
+colleagues at the entrance don't have to touch attendees phones and can verify
+registrations from a save distance on their own devices.
+
 ## Licence
 
 Everything in this repository is under the MIT license, except for the
