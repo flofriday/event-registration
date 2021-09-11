@@ -43,7 +43,7 @@ register. Once they are registered, a cookie is set, which will only expire
 after three days or if the user is deleted from the database. This means all
 cookies can be invalidated by deleting the sqlite database file.
 
-For you, the event host, and your colleagues is a admin page available under
+For you, the event host, and your colleagues, there is a admin page available under
 `/admin`. From there you can export all contacts as JSON or CSV(Excel). The
 admin dashboard also shows the last 10 registered persons which means your
 colleagues at the entrance don't have to touch attendees phones and can verify
