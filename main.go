@@ -168,12 +168,12 @@ func createUser(store *SqlStore) http.HandlerFunc {
 		// Successfully registered the user, set them a cookie to indicate that
 		// they are logged in.
 		cookie := http.Cookie{
-			Name:     "auth",
+			Name:     "event-registration-auth",
 			Value:    user.UUID,
 			Path:     "/",
 			Expires:  time.Now().Add(time.Hour * 24 * 3),
 			HttpOnly: true,
-			SameSite: http.SameSiteStrictMode,
+			SameSite: http.SameSiteLaxMode,
 		}
 		http.SetCookie(rw, &cookie)
 		rw.WriteHeader(http.StatusCreated)
