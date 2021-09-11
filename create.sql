@@ -6,3 +6,6 @@ CREATE TABLE IF NOT EXISTS user (
 	phone TEXT NOT NULL,
 	createdat INTEGER NOT NULL
 );
+
+-- Create an index so that the lookup of the last n users is really fast
+CREATE INDEX IF NOT EXISTS userdateindex ON user (createdat DESC);

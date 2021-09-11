@@ -14,7 +14,7 @@ However, it should also be easily adaptable to other events.
   - phone number and if available email (this app makes it a requirement)
   - Date and time of registration
 - Easy setup, configuration and deployment
-- Simple datastorage (sqlite) and export(csv) via the Webinterface.
+- Simple storage (sqlite) and export(csv) via the Webinterface.
 - Great documentation
 
 ## Setup
