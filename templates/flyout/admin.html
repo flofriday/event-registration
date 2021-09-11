@@ -46,11 +46,15 @@
           Reload
         </a>
       </h1>
-      <br />
+      <small class="text-muted"
+        >This page does not automatically update. You need to reload
+        manually.</small
+      >
 
-      <b>Total Registered Users:</b> {{.Statistic.UsersTotal}} <br />
+      <p class="mt-3">
+        <b>Registered customers:</b> {{.Statistic.UsersTotal}} <br />
 
-      <b>Last {{len .Statistic.LastUsers}} registered users:</b>
+      <b>Last {{len .Statistic.LastUsers}} customers:</b>
       <div style="overflow-x: scroll">
         <table class="table table-hover table-bordered">
           <tr>
@@ -81,8 +85,9 @@
           {{end}}
         </table>
       </div>
+      </p>
 
-      <h2>Export all users:</h2>
+      <h2>Export all customers:</h2>
       <ul>
         <li><a href="/api/users.csv">as CSV</a></li>
         <li><a href="/api/users.json">as JSON</a></li>
@@ -95,8 +100,8 @@
       </ul>
       <div>Close the browser (not just the tab) to logout.</div>
 
-      <footer style="margin-top: 10px">
-        <small>
+      <footer style="margin: 30px" class="text-center">
+        <small class="text-muted">
           Created with ❤️ by
           <a href="https://github.com/flofriday">flofriday</a>
         </small>
