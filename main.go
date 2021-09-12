@@ -16,6 +16,8 @@ import (
 	"github.com/go-chi/chi/middleware"
 )
 
+const cookieName = "event-registration-auth"
+
 func handleHome(store *SqlStore, config *Config) http.HandlerFunc {
 	// Setup some templates and files, this will only run once and can be used
 	// concurrently by the function that will be returned.
@@ -31,7 +33,7 @@ func handleHome(store *SqlStore, config *Config) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		// Extract the cookie like a blue monster and see if the user is logged
 		// in
-		cookie, err := r.Cookie("auth")
+		cookie, err := r.Cookie(cookieName)
 		if err != nil {
 			// There is no available cookie so just return the registration
 			//page
@@ -51,11 +53,12 @@ func handleHome(store *SqlStore, config *Config) http.HandlerFunc {
 			// reset their cookie.
 			log.Printf("No user with UUID %s could loaded: %s", cookie.Value, err.Error())
 			cookie := http.Cookie{
-				Name:     "auth",
+				Name:     cookieName,
 				Value:    "",
 				Path:     "/",
 				Expires:  time.Unix(0, 0),
 				HttpOnly: true,
+				SameSite: http.SameSiteLaxMode,
 			}
 			http.SetCookie(rw, &cookie)
 			rw.WriteHeader(http.StatusOK)
@@ -168,7 +171,7 @@ func createUser(store *SqlStore) http.HandlerFunc {
 		// Successfully registered the user, set them a cookie to indicate that
 		// they are logged in.
 		cookie := http.Cookie{
-			Name:     "event-registration-auth",
+			Name:     cookieName,
 			Value:    user.UUID,
 			Path:     "/",
 			Expires:  time.Now().Add(time.Hour * 24 * 3),
