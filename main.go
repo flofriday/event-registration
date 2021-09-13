@@ -124,7 +124,7 @@ func userValidater() func(*User) error {
 	// This regex is not perfect and is probably too lax. However, for our
 	// task at hand it is good enough. If you want to read more about email
 	// regexes, I can only recommend: https://www.regular-expressions.info/email.html
-	emailRegexp := regexp.MustCompile(`^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$`)
+	emailRegexp := regexp.MustCompile(`^.+@.+\.[A-Za-z]{2,}$`)
 
 	// Yes this phone regex is also very liberal. I think it is save to assume
 	// that there are 6 characters at least.
