@@ -64,8 +64,10 @@
           <input type="tel" class="form-control" id="phone" required />
         </div>
 
+        <div id="error" class="text-danger"></div>
         <div class="col-12 text-right">
           <button
+            id="submit"
             class="btn float-end"
             style="background-color: #80d8ff"
             onclick="register(event)"
@@ -81,8 +83,6 @@
           </button>
         </div>
       </form>
-
-      <div id="error" style="color: red"></div>
     </div>
 
     <script>
@@ -94,9 +94,13 @@
       const phoneEl = document.getElementById("phone");
       const errorEl = document.getElementById("error");
       const progressEl = document.getElementById("progress");
+      const submitEl = document.getElementById("submit");
 
       async function register(e) {
         e.preventDefault();
+
+        // Reset error message
+        errorEl.innerText = "";
 
         // Disable all elements
         const elements = form.elements;
@@ -104,6 +108,7 @@
           elements[i].readOnly = true;
         }
         progressEl.hidden = false;
+        submitEl.disabled = true;
 
         // Register at the server
         const host = location.origin;
@@ -122,9 +127,14 @@
         });
 
         if (res.status != 201) {
-          progressEl.hidden = true;
+          //progressEl.hidden = true;
+          for (let i = 0, len = elements.length; i < len; ++i) {
+            elements[i].readOnly = false;
+          }
           errorEl.innerText =
-            "Something went wrong, the server returned: " + res.status;
+            "Oh no, something went wrong!\n" + " " + (await res.text());
+          progressEl.hidden = true;
+          submitEl.disabled = false;
         } else {
           // Reload the page to show what they entered.
           // Yes I know this is not best practice but it will work just fine for

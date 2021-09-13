@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -10,6 +11,8 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -117,6 +120,46 @@ func handleAdmin(store *SqlStore, config *Config) http.HandlerFunc {
 	}
 }
 
+func userValidater() func(*User) error {
+	// This regex is not perfect and is probably too lax. However, for our
+	// task at hand it is good enough. If you want to read more about email
+	// regexes, I can only recommend: https://www.regular-expressions.info/email.html
+	emailRegexp := regexp.MustCompile(`^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$`)
+
+	// Yes this phone regex is also very liberal. I think it is save to assume
+	// that there are 6 characters at least.
+	phoneRegexp := regexp.MustCompile(`^\+?[0-9\-\s\(\)]{6,}$`)
+
+	notEmptyRegexp := regexp.MustCompile("^.+$")
+
+	return func(user *User) error {
+		msg := make([]string, 0)
+
+		if !notEmptyRegexp.MatchString(user.FirstName) {
+			msg = append(msg, "first name is empty")
+		}
+
+		if !notEmptyRegexp.MatchString(user.LastName) {
+			msg = append(msg, "second name is empty")
+		}
+
+		if !phoneRegexp.MatchString(user.Phone) {
+			log.Println(user.Phone)
+			msg = append(msg, "phonenumber is invalid")
+		}
+
+		if !emailRegexp.MatchString(user.Email) {
+			msg = append(msg, "email is invalid")
+		}
+
+		if len(msg) == 0 {
+			return nil
+		}
+
+		return errors.New(strings.Join(msg, ", "))
+	}
+}
+
 func createUser(store *SqlStore) http.HandlerFunc {
 	// Create a new struct to match the input of the request
 	type UserInput struct {
@@ -125,6 +168,8 @@ func createUser(store *SqlStore) http.HandlerFunc {
 		Email     string `json:"email"`
 		Phone     string `json:"phone"`
 	}
+
+	validateUser := userValidater()
 
 	return func(rw http.ResponseWriter, r *http.Request) {
 		// Parse the input
@@ -153,11 +198,19 @@ func createUser(store *SqlStore) http.HandlerFunc {
 
 		user := User{
 			UUID:      uuid,
-			FirstName: input.FirstName,
-			LastName:  input.LastName,
-			Email:     input.Email,
-			Phone:     input.Phone,
+			FirstName: strings.TrimSpace(input.FirstName),
+			LastName:  strings.TrimSpace(input.LastName),
+			Email:     strings.TrimSpace(input.Email),
+			Phone:     strings.TrimSpace(input.Phone),
 			CreatedAt: time.Now(),
+		}
+
+		// Validate that the input is correct
+		if err = validateUser(&user); err != nil {
+			log.Printf("Validation failed: %s", err.Error())
+			msg := "Your input failed the validation: " + err.Error()
+			http.Error(rw, msg, http.StatusBadRequest)
+			return
 		}
 
 		// Add the user to the storage
