@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -31,8 +31,8 @@
     />
     <title>Admin</title>
   </head>
-  <body>
-    <div class="container">
+  <body class="d-flex flex-column h-100">
+    <div class="container mb-5">
       <div style="display: flex; justify-content: center">
         <img
           src="https://spaceteam.at/wp-content/uploads/2020/11/SpaceTeam_Logo_Black.png"
@@ -102,13 +102,24 @@
       <div>You need to close the browser (not just the tab) to logout.</div>
       This app is Open Source and available <a href="https://github.com/flofriday/event-registration">on Github</a>. 
 
-      <footer style="margin: 30px" class="text-center">
-        <small class="text-muted">
-          Created with ❤️ by
-          <a href="https://github.com/flofriday">flofriday</a>
-        </small>
-      </footer>
     </div>
+
+    <footer class="footer mt-auto py-3 bg-light">
+      <div class="container d-flex justify-content-between">
+        <small class="text-muted"
+          >Made with ❤️ by
+          <a href="https://github.com/flofriday">flofriday</a></small
+        >
+        <small class="text-muted"
+          >on
+          <a
+            class="text-muted"
+            href="https://github.com/flofriday/event-registration"
+            >GitHub</a
+          >
+        </small>
+      </div>
+    </footer>
 
     <script>
       async function deleteUser(uuid, name) {

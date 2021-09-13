@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -32,7 +32,7 @@
 
     <title>Success Flyout Event</title>
   </head>
-  <body>
+  <body class="d-flex flex-column h-100">
     <style>
       section {
         position: relative;
@@ -106,12 +106,29 @@
       </div>
     </section>
     <section>
-      <div class="container">
+      <div class="container mb-5">
         <h2>{{.FirstName}} {{.LastName}}</h2>
         <h2>{{.Email}}</h2>
         <h2>{{.Phone}}</h2>
         <h2>{{.CreatedAt.Format "15:04 02.01.2006 (MST)"}}</h2>
       </div>
     </section>
+
+    <footer class="footer mt-auto py-3 bg-light">
+      <div class="container d-flex justify-content-between">
+        <small class="text-muted"
+          >Made with ❤️ by
+          <a href="https://github.com/flofriday">flofriday</a></small
+        >
+        <small class="text-muted"
+          >on
+          <a
+            class="text-muted"
+            href="https://github.com/flofriday/event-registration"
+            >GitHub</a
+          >
+        </small>
+      </div>
+    </footer>
   </body>
 </html>
