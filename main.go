@@ -21,6 +21,18 @@ import (
 
 const cookieName = "event-registration-auth"
 
+func deleteCookie(rw http.ResponseWriter) {
+	cookie := http.Cookie{
+		Name:     cookieName,
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	}
+	http.SetCookie(rw, &cookie)
+}
+
 func handleHome(store *SqlStore, config *Config) http.HandlerFunc {
 	// Setup some templates and files, this will only run once and can be used
 	// concurrently by the function that will be returned.
@@ -55,15 +67,7 @@ func handleHome(store *SqlStore, config *Config) http.HandlerFunc {
 			// Anyway, we will just gonna send them the register page and
 			// reset their cookie.
 			log.Printf("No user with UUID %s could loaded: %s", cookie.Value, err.Error())
-			cookie := http.Cookie{
-				Name:     cookieName,
-				Value:    "",
-				Path:     "/",
-				Expires:  time.Unix(0, 0),
-				HttpOnly: true,
-				SameSite: http.SameSiteLaxMode,
-			}
-			http.SetCookie(rw, &cookie)
+			deleteCookie(rw)
 			rw.WriteHeader(http.StatusOK)
 			rw.Write(registerDocument)
 			return
@@ -117,6 +121,15 @@ func handleAdmin(store *SqlStore, config *Config) http.HandlerFunc {
 		}
 
 		adminTemplate.Execute(rw, data)
+	}
+}
+
+// reset deletes the auth cookie of any registered user so that they can
+// register again. This a hack so that one phone can sign up multiple attendees
+func reset() http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		deleteCookie(rw)
+		http.Redirect(rw, r, "/", http.StatusMovedPermanently)
 	}
 }
 
@@ -320,6 +333,7 @@ func createRoutes(store *SqlStore, config *Config) chi.Router {
 
 	// Templates
 	r.Get("/", handleHome(store, config))
+	r.Get("/reset", reset())
 
 	// Admin webinterface
 	if config.AdminEnable {
@@ -335,7 +349,6 @@ func createRoutes(store *SqlStore, config *Config) chi.Router {
 		r.Post("/users", createUser(store))
 
 		// Actions performend by admins
-		// TODO: add admin middleware
 		if config.AdminEnable {
 			r.Route("/", func(r chi.Router) {
 				r.Use(adminMiddleware)
