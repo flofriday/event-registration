@@ -36,6 +36,11 @@ The app is now available at http://localhost:3000/
 
 The app is now available at http://localhost:3000/
 
+**Note:** The created docker container should not be used in production, as
+it will lose all state when it is restarted. This can be prevented with 
+[docker volumes](https://docs.docker.com/storage/volumes/) or 
+[docker bind mounts](https://docs.docker.com/storage/bind-mounts/).
+
 ## How it works
 
 After you deployed the app you can [create a QR Code](https://qr-creator.com/url.php)
